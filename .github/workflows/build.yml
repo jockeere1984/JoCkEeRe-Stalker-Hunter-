@@ -23,7 +23,7 @@ jobs:
       - name: Build APK
         run: buildozer -v android debug
       - name: Upload APK
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: JoCkEeRe-APK
           path: bin/*.apk
