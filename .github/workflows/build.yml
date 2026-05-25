@@ -36,16 +36,19 @@ jobs:
           pip install --upgrade pip
           pip install cython==0.29.37 buildozer==1.5.0
 
-      - name: Link build-tools to buildozer path
+      - name: Setup buildozer SDK paths
         run: |
-          mkdir -p $HOME/.buildozer/android/platform/android-sdk/build-tools
-          ln -sf $ANDROID_SDK_ROOT/build-tools/33.0.2 $HOME/.buildozer/android/platform/android-sdk/build-tools/33.0.2
-          mkdir -p $HOME/.buildozer/android/platform/android-sdk/platforms
-          ln -sf $ANDROID_SDK_ROOT/platforms/android-33 $HOME/.buildozer/android/platform/android-sdk/platforms/android-33
-          mkdir -p $HOME/.buildozer/android/platform/android-sdk/platform-tools
-          ln -sf $ANDROID_SDK_ROOT/platform-tools $HOME/.buildozer/android/platform/android-sdk/platform-tools
-          mkdir -p $HOME/.buildozer/android/platform/android-sdk/ndk
-          ln -sf $ANDROID_SDK_ROOT/ndk/25.2.9519653 $HOME/.buildozer/android/platform/android-sdk/ndk/25.2.9519653
+          BSDK=$HOME/.buildozer/android/platform/android-sdk
+          mkdir -p $BSDK/build-tools
+          mkdir -p $BSDK/platforms
+          mkdir -p $BSDK/ndk
+          mkdir -p $BSDK/tools/bin
+
+          ln -sf $ANDROID_SDK_ROOT/build-tools/33.0.2 $BSDK/build-tools/33.0.2
+          ln -sf $ANDROID_SDK_ROOT/platforms/android-33 $BSDK/platforms/android-33
+          ln -sf $ANDROID_SDK_ROOT/platform-tools $BSDK/platform-tools
+          ln -sf $ANDROID_SDK_ROOT/ndk/25.2.9519653 $BSDK/ndk/25.2.9519653
+          ln -sf $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager $BSDK/tools/bin/sdkmanager
 
       - name: Build APK
         run: |
