@@ -24,10 +24,14 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y git zip unzip openjdk-17-jdk autoconf libtool pkg-config zlib1g-dev libncurses5-dev libffi-dev libssl-dev cmake build-essential
 
-      - name: Accept all Android licenses
+      - name: Setup Android SDK and accept licenses
         run: |
           yes | $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --licenses
-          $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager "build-tools;33.0.2" "platforms;android-33" "platform-tools"
+          $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager \
+            "build-tools;33.0.2" \
+            "platforms;android-33" \
+            "platform-tools" \
+            "ndk;25.2.9519653"
 
       - name: Install Python deps
         run: |
@@ -37,6 +41,7 @@ jobs:
       - name: Build APK
         run: |
           export ANDROID_HOME=$ANDROID_SDK_ROOT
+          export ANDROID_NDK_HOME=$ANDROID_SDK_ROOT/ndk/25.2.9519653
           buildozer -v android debug
 
       - name: Upload APK
