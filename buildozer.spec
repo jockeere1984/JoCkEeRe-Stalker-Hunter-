@@ -18,6 +18,7 @@ android.api = 33
 android.build_tools_version = 33.0.2
 android.ndk = 25b
 android.sdk = 33
+android.build_tools_version = 33.0.2
 
 android.permissions = INTERNET,READ_EXTERNAL_STORAGE,WRITE_EXTERNAL_STORAGE,VIBRATE,ACCESS_NETWORK_STATE
 
