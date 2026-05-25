@@ -12,28 +12,17 @@ jobs:
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+
+      - name: Build with Buildozer
+        uses: ArtemSBulgakov/buildozer-action@v1
+        id: buildozer
         with:
-          python-version: '3.10'
-      - name: Install system deps
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y git zip unzip openjdk-17-jdk autoconf libtool pkg-config zlib1g-dev libncurses5-dev libffi-dev libssl-dev cmake build-essential
-      - name: Accept Android licenses
-        run: |
-          mkdir -p $HOME/.android
-          touch $HOME/.android/repositories.cfg
-          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses || true
-          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "build-tools;33.0.2" "platforms;android-33" "platform-tools" || true
-      - name: Install Python deps
-        run: |
-          pip install --upgrade pip
-          pip install cython==0.29.37 buildozer==1.5.0
-      - name: Build APK
-        run: buildozer -v android debug
+          command: buildozer android debug
+          buildozer_version: stable
+
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: JoCkEeRe-APK
-          path: bin/*.apk
+          path: ${{ steps.buildozer.outputs.filename }}
           retention-days: 7
