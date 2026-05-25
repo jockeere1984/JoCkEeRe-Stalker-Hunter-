@@ -10,19 +10,38 @@ jobs:
   build:
     runs-on: ubuntu-22.04
     timeout-minutes: 60
+    env:
+      ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
     steps:
       - uses: actions/checkout@v4
 
-      - name: Build with Buildozer
-        uses: ArtemSBulgakov/buildozer-action@v1
-        id: buildozer
+      - uses: actions/setup-python@v5
         with:
-          command: buildozer android debug
-          buildozer_version: stable
+          python-version: '3.10'
+
+      - name: Install system deps
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y git zip unzip openjdk-17-jdk autoconf libtool pkg-config zlib1g-dev libncurses5-dev libffi-dev libssl-dev cmake build-essential
+
+      - name: Accept all Android licenses
+        run: |
+          yes | $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --licenses
+          $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager "build-tools;33.0.2" "platforms;android-33" "platform-tools"
+
+      - name: Install Python deps
+        run: |
+          pip install --upgrade pip
+          pip install cython==0.29.37 buildozer==1.5.0
+
+      - name: Build APK
+        run: |
+          export ANDROID_HOME=$ANDROID_SDK_ROOT
+          buildozer -v android debug
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: JoCkEeRe-APK
-          path: ${{ steps.buildozer.outputs.filename }}
+          path: bin/*.apk
           retention-days: 7
