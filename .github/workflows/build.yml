@@ -28,30 +28,38 @@ jobs:
           pip install --upgrade pip
           pip install cython==0.29.37 buildozer==1.5.0
 
-      - name: Setup Android SDK in buildozer path
+      - name: Setup buildozer SDK and NDK paths
         run: |
           BSDK=$HOME/.buildozer/android/platform/android-sdk
-          SYSTEM_SDK=/usr/local/lib/android/sdk
+          BNDK=$HOME/.buildozer/android/platform/android-ndk-r25b
+          SYS=/usr/local/lib/android/sdk
+
           mkdir -p $BSDK/tools/bin
           mkdir -p $BSDK/build-tools
           mkdir -p $BSDK/platforms
           mkdir -p $BSDK/platform-tools
-          yes | $SYSTEM_SDK/cmdline-tools/latest/bin/sdkmanager --licenses || true
-          $SYSTEM_SDK/cmdline-tools/latest/bin/sdkmanager "build-tools;33.0.2" "platforms;android-33" "platform-tools"
-          ln -sf $SYSTEM_SDK/build-tools/33.0.2 $BSDK/build-tools/33.0.2
-          ln -sf $SYSTEM_SDK/platforms/android-33 $BSDK/platforms/android-33
-          ln -sf $SYSTEM_SDK/platform-tools/adb $BSDK/platform-tools/adb
+
+          yes | $SYS/cmdline-tools/latest/bin/sdkmanager --licenses || true
+          $SYS/cmdline-tools/latest/bin/sdkmanager "build-tools;33.0.2" "platforms;android-33" "platform-tools"
+
+          ln -sf $SYS/build-tools/33.0.2   $BSDK/build-tools/33.0.2
+          ln -sf $SYS/platforms/android-33  $BSDK/platforms/android-33
+          ln -sf $SYS/platform-tools        $BSDK/platform-tools/tools
+
           printf '#!/bin/bash\nexec /usr/local/lib/android/sdk/cmdline-tools/latest/bin/sdkmanager "$@"\n' > $BSDK/tools/bin/sdkmanager
           chmod +x $BSDK/tools/bin/sdkmanager
-          printf '#!/bin/bash\necho "Android SDK tool wrapper"\n' > $BSDK/tools/bin/android
+          printf '#!/bin/bash\necho ok\n' > $BSDK/tools/bin/android
           chmod +x $BSDK/tools/bin/android
 
-      - name: Setup NDK in buildozer path
-        run: |
-          ln -sf /usr/local/lib/android/sdk/ndk/25.2.9519653 $HOME/.buildozer/android/platform/android-ndk-r25b
+          ln -sf $SYS/ndk/27.3.13750724 $BNDK
 
       - name: Build APK
-        run: buildozer -v android debug
+        run: |
+          export ANDROIDSDK=$HOME/.buildozer/android/platform/android-sdk
+          export ANDROIDNDK=$HOME/.buildozer/android/platform/android-ndk-r25b
+          export ANDROIDAPI=33
+          export ANDROIDMINAPI=21
+          buildozer -v android debug
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
