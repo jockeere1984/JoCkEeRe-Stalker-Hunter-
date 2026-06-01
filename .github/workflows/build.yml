@@ -1,4 +1,3 @@
-
 name: Build APK
 
 on:
@@ -51,6 +50,10 @@ jobs:
           RUN pip3 install --upgrade pip && \
               pip3 install cython==0.29.37 buildozer==1.5.0
 
+          RUN useradd -m -u 1000 builder && \
+              chown -R builder:builder /opt/android-sdk
+
+          USER builder
           WORKDIR /app
           EOF
 
@@ -61,6 +64,7 @@ jobs:
         run: |
           docker run --rm \
             -v "${{ github.workspace }}":/app \
+            --user 1000:1000 \
             jockeere-builder \
             buildozer -v android debug
 
