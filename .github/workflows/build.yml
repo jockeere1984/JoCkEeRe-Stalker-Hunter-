@@ -8,62 +8,32 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-22.04
-    timeout-minutes: 60
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
 
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.10'
-
-      - name: Install system deps
+      - name: Free disk space
         run: |
-          sudo apt-get update
-          sudo apt-get install -y git zip unzip openjdk-17-jdk autoconf libtool pkg-config zlib1g-dev libncurses5-dev libffi-dev libssl-dev cmake build-essential
+          sudo rm -rf /usr/local/lib/android
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf /opt/ghc
+          df -h
 
-      - name: Install Python deps
+      - name: Pull kivy/buildozer Docker image
+        run: docker pull kivy/buildozer
+
+      - name: Build APK with Docker
         run: |
-          pip install --upgrade pip
-          pip install cython==0.29.37 buildozer==1.5.0
-
-      - name: Prepare SDK layout for buildozer
-        run: |
-          SYS=/usr/local/lib/android/sdk
-          BSDK=$HOME/.buildozer/android/platform/android-sdk
-          BNDK=$HOME/.buildozer/android/platform/android-ndk-r25b
-
-          yes | $SYS/cmdline-tools/latest/bin/sdkmanager --licenses || true
-          $SYS/cmdline-tools/latest/bin/sdkmanager "build-tools;33.0.2" "platforms;android-33" "platform-tools"
-
-          mkdir -p $BSDK/tools/bin
-          mkdir -p $BSDK/cmdline-tools/latest/bin
-          mkdir -p $BSDK/build-tools
-          mkdir -p $BSDK/platforms
-          mkdir -p $BSDK/platform-tools
-
-          ln -sfn $SYS/build-tools/33.0.2  $BSDK/build-tools/33.0.2
-          ln -sfn $SYS/platforms/android-33 $BSDK/platforms/android-33
-          ln -sfn $SYS/platform-tools       $BSDK/platform-tools
-
-          printf '#!/bin/bash\nexec /usr/local/lib/android/sdk/cmdline-tools/latest/bin/sdkmanager "$@"\n' > $BSDK/tools/bin/sdkmanager
-          chmod +x $BSDK/tools/bin/sdkmanager
-          cp $BSDK/tools/bin/sdkmanager $BSDK/cmdline-tools/latest/bin/sdkmanager
-
-          printf '#!/bin/bash\necho ok\n' > $BSDK/tools/bin/android
-          chmod +x $BSDK/tools/bin/android
-
-          ln -sfn $SYS/ndk/27.3.13750724 $BNDK
-
-      - name: Build APK
-        run: |
-          export ANDROIDSDK=$HOME/.buildozer/android/platform/android-sdk
-          export ANDROIDNDK=$HOME/.buildozer/android/platform/android-ndk-r25b
-          export ANDROIDAPI=33
-          export ANDROIDMINAPI=21
-          export ANDROID_HOME=$ANDROIDSDK
-          buildozer -v android debug
+          docker run --rm \
+            -v "${{ github.workspace }}":/home/user/hostcwd \
+            kivy/buildozer \
+            bash -c "
+              cd /home/user/hostcwd &&
+              pip install --upgrade buildozer cython==0.29.37 &&
+              buildozer -v android debug
+            "
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
