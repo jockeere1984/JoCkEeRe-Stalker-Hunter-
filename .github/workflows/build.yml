@@ -10,9 +10,6 @@ jobs:
   build:
     runs-on: ubuntu-22.04
     timeout-minutes: 60
-    env:
-      ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
-      ANDROID_HOME: /usr/local/lib/android/sdk
 
     steps:
       - uses: actions/checkout@v4
@@ -26,34 +23,35 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y git zip unzip openjdk-17-jdk autoconf libtool pkg-config zlib1g-dev libncurses5-dev libffi-dev libssl-dev cmake build-essential
 
-      - name: Accept licenses and install SDK
-        run: |
-          yes | $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --licenses || true
-          $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager "build-tools;33.0.2" "platforms;android-33" "platform-tools" "ndk;25.2.9519653"
-
       - name: Install Python deps
         run: |
           pip install --upgrade pip
           pip install cython==0.29.37 buildozer==1.5.0
 
-      - name: Setup buildozer SDK paths
+      - name: Setup Android SDK in buildozer path
         run: |
           BSDK=$HOME/.buildozer/android/platform/android-sdk
+          SYSTEM_SDK=/usr/local/lib/android/sdk
+          mkdir -p $BSDK/tools/bin
           mkdir -p $BSDK/build-tools
           mkdir -p $BSDK/platforms
-          mkdir -p $BSDK/ndk
-          mkdir -p $BSDK/tools/bin
+          mkdir -p $BSDK/platform-tools
+          yes | $SYSTEM_SDK/cmdline-tools/latest/bin/sdkmanager --licenses || true
+          $SYSTEM_SDK/cmdline-tools/latest/bin/sdkmanager "build-tools;33.0.2" "platforms;android-33" "platform-tools"
+          ln -sf $SYSTEM_SDK/build-tools/33.0.2 $BSDK/build-tools/33.0.2
+          ln -sf $SYSTEM_SDK/platforms/android-33 $BSDK/platforms/android-33
+          ln -sf $SYSTEM_SDK/platform-tools/adb $BSDK/platform-tools/adb
+          printf '#!/bin/bash\nexec /usr/local/lib/android/sdk/cmdline-tools/latest/bin/sdkmanager "$@"\n' > $BSDK/tools/bin/sdkmanager
+          chmod +x $BSDK/tools/bin/sdkmanager
+          printf '#!/bin/bash\necho "Android SDK tool wrapper"\n' > $BSDK/tools/bin/android
+          chmod +x $BSDK/tools/bin/android
 
-          ln -sf $ANDROID_SDK_ROOT/build-tools/33.0.2 $BSDK/build-tools/33.0.2
-          ln -sf $ANDROID_SDK_ROOT/platforms/android-33 $BSDK/platforms/android-33
-          ln -sf $ANDROID_SDK_ROOT/platform-tools $BSDK/platform-tools
-          ln -sf $ANDROID_SDK_ROOT/ndk/25.2.9519653 $BSDK/ndk/25.2.9519653
-          ln -sf $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager $BSDK/tools/bin/sdkmanager
+      - name: Setup NDK in buildozer path
+        run: |
+          ln -sf /usr/local/lib/android/sdk/ndk/25.2.9519653 $HOME/.buildozer/android/platform/android-ndk-r25b
 
       - name: Build APK
-        run: |
-          export ANDROID_NDK_HOME=$ANDROID_SDK_ROOT/ndk/25.2.9519653
-          buildozer -v android debug
+        run: buildozer -v android debug
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
