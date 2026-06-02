@@ -27,8 +27,6 @@ android.ndk_path = /opt/android-sdk/ndk/25.2.9519653
 
 android.ant_path = /usr/share/ant
 
-android.build_tools_version = 33.0.2
-
 android.archs = armeabi-v7a
 
 android.release_artifact = apk
