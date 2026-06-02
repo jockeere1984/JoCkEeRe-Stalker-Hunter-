@@ -10,7 +10,7 @@ RUN apt-get update && apt-get install -y \
     autoconf libtool pkg-config \
     zlib1g-dev libncurses5-dev \
     libffi-dev libssl-dev \
-    cmake build-essential && \
+    cmake build-essential ant && \
     rm -rf /var/lib/apt/lists/*
 
 RUN mkdir -p /opt/android-sdk/cmdline-tools && \
@@ -30,8 +30,7 @@ RUN pip3 install --upgrade pip && \
     pip3 install cython==0.29.37 buildozer==1.5.0
 
 RUN useradd -m -u 1000 builder && \
-    chown -R builder:builder /opt/android-sdk && \
-    chown -R builder:builder /usr/share/ant
+    chown -R builder:builder /opt/android-sdk
 
 USER builder
 WORKDIR /app
