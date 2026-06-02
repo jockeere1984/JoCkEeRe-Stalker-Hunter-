@@ -30,7 +30,8 @@ RUN pip3 install --upgrade pip && \
     pip3 install cython==0.29.37 buildozer==1.5.0
 
 RUN useradd -m -u 1000 builder && \
-    chown -R builder:builder /opt/android-sdk
+    chown -R builder:builder /opt/android-sdk && \
+    chown -R builder:builder /usr/share/ant
 
 USER builder
 WORKDIR /app
