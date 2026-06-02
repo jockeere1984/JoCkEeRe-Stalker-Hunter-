@@ -9,7 +9,7 @@ source.include_exts = py,png,jpg,kv,atlas,json
 
 version = 2.0
 
-requirements = python3,kivy==2.3.0,requests,urllib3,certifi,charset-normalizer,idna,plyer
+requirements = python3,kivy==2.2.1,requests,urllib3,certifi,charset-normalizer,idna,plyer
 
 orientation = portrait
 
@@ -23,7 +23,7 @@ android.permissions = INTERNET,READ_EXTERNAL_STORAGE,WRITE_EXTERNAL_STORAGE,VIBR
 
 android.sdk_path = /opt/android-sdk
 
-android.ndk_path = /opt/android-sdk/ndk/23.2.8568313
+android.ndk_path = /opt/android-sdk/ndk/25.2.9519653
 android.ant_path = /usr/share/ant
 
 android.archs = armeabi-v7a
