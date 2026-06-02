@@ -1,3 +1,4 @@
+
 name: Build APK
 
 on:
@@ -17,6 +18,9 @@ jobs:
         run: |
           sudo rm -rf /usr/local/lib/android /usr/share/dotnet /opt/ghc
           df -h
+
+      - name: Fix permissions
+        run: chmod -R 777 ${{ github.workspace }}
 
       - name: Create Dockerfile
         run: |
@@ -72,5 +76,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: JoCkEeRe-APK
-          path: bin/*.apk
-          retention-days: 7
+          path: bin/*.apk      
