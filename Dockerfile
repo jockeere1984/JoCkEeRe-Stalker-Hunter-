@@ -22,10 +22,8 @@ RUN mkdir -p /opt/android-sdk/cmdline-tools && \
 ENV PATH="${ANDROID_HOME}/cmdline-tools/latest/bin:${ANDROID_HOME}/platform-tools:${ANDROID_HOME}/build-tools/33.0.2:${ANDROID_HOME}/tools/bin:/usr/local/bin:${PATH}"
 
 RUN yes | sdkmanager --licenses 2>/dev/null || true
-RUN sdkmanager "platform-tools" "platforms;android-33" "build-tools;33.0.2" "ndk;23.2.8568313"
-
-ENV ANDROID_NDK_HOME=/opt/android-sdk/ndk/23.2.8568313
-
+RUN sdkmanager "platform-tools" "platforms;android-33" "build-tools;33.0.2" "ndk;25.2.9519653"
+ENV ANDROID_NDK_HOME=/opt/android-sdk/ndk/25.2.9519653
 RUN pip3 install --upgrade pip && \
     pip3 install cython==0.29.37 buildozer==1.5.0
 
