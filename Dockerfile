@@ -10,7 +10,8 @@ RUN apt-get update && apt-get install -y \
     autoconf libtool pkg-config \
     zlib1g-dev libncurses5-dev \
     libffi-dev libssl-dev \
-    cmake build-essential ant && \
+    cmake build-essential ant \
+    libltdl-dev && \
     rm -rf /var/lib/apt/lists/*
 
 RUN mkdir -p /opt/android-sdk/cmdline-tools && \
@@ -23,9 +24,13 @@ ENV PATH="${ANDROID_HOME}/cmdline-tools/latest/bin:${ANDROID_HOME}/platform-tool
 
 RUN yes | sdkmanager --licenses 2>/dev/null || true
 RUN sdkmanager "platform-tools" "platforms;android-33" "build-tools;33.0.2" "ndk;25.2.9519653"
+
 ENV ANDROID_NDK_HOME=/opt/android-sdk/ndk/25.2.9519653
+
 RUN pip3 install --upgrade pip && \
-    pip3 install cython==0.29.37 buildozer==1.5.0
+    pip3 install cython==0.29.37 \
+    buildozer==1.5.0 \
+    python-for-android==2023.9.16
 
 RUN mkdir -p /opt/android-sdk/tools/bin && \
     ln -sf /opt/android-sdk/cmdline-tools/latest/bin/sdkmanager /opt/android-sdk/tools/bin/sdkmanager && \
