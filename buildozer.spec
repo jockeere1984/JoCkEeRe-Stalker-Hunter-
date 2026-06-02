@@ -23,8 +23,7 @@ android.permissions = INTERNET,READ_EXTERNAL_STORAGE,WRITE_EXTERNAL_STORAGE,VIBR
 
 android.sdk_path = /opt/android-sdk
 
-android.ndk_path = /opt/android-sdk/ndk/25.2.9519653
-
+android.ndk_path = /opt/android-sdk/ndk/23.2.8568313
 android.ant_path = /usr/share/ant
 
 android.archs = armeabi-v7a
