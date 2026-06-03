@@ -11,6 +11,8 @@ version = 2.0
 
 p4a.python_version = 3.11
 
+p4a.hook = pre_build_hook.py
+
 requirements = python3,kivy==2.3.0,requests,urllib3,certifi,charset-normalizer,idna
 orientation = portrait
 
