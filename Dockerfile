@@ -27,7 +27,7 @@ RUN sdkmanager "platform-tools" "platforms;android-33" "build-tools;33.0.2" "ndk
 ENV ANDROID_NDK_HOME=/opt/android-sdk/ndk/25.2.9519653
 
 RUN pip install --upgrade pip && \
-    pip install cython==0.29.37 buildozer==1.5.0
+    pip install "cython<4,>=3.0.0" buildozer==1.5.0
 
 RUN mkdir -p /opt/android-sdk/tools/bin && \
     ln -sf /opt/android-sdk/cmdline-tools/latest/bin/sdkmanager /opt/android-sdk/tools/bin/sdkmanager && \
