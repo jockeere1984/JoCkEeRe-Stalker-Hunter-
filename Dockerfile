@@ -1,11 +1,10 @@
-
 FROM python:3.10-slim-bullseye
 ENV DEBIAN_FRONTEND=noninteractive
 ENV ANDROID_HOME=/opt/android-sdk
 ENV ANDROID_SDK_ROOT=/opt/android-sdk
 
 RUN apt-get update && apt-get install -y \
-    git zip unzip openjdk-11-jdk wget curl \
+    git zip unzip openjdk-17-jdk wget curl \
     autoconf libtool pkg-config \
     zlib1g-dev libncurses5-dev \
     libffi-dev libssl-dev \
