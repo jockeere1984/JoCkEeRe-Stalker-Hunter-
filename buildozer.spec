@@ -9,7 +9,9 @@ source.include_exts = py,png,jpg,kv,atlas,json
 
 version = 2.0
 
-requirements = python3,kivy==2.3.0,requests,urllib3,certifi,charset-normalizer,idna
+p4a.python_version = 3.11
+
+requirements = python3==3.11.0,kivy==2.3.0,requests,urllib3,certifi,charset-normalizer,idna
 orientation = portrait
 
 android.minapi = 21
