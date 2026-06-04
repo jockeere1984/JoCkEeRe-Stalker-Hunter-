@@ -30,8 +30,14 @@ jobs:
           docker run --rm \
             -v "${{ github.workspace }}":/app \
             --user 1000:1000 \
+            -e PYTHON=/usr/bin/python3.10 \
+            -e PYTHONPATH="" \
             jockeere-builder \
-            buildozer -v android debug
+            /bin/bash -c "
+              export PYTHON=/usr/bin/python3.10 &&
+              export PYTHONPATH='' &&
+              python3.10 -m buildozer -v android debug 2>&1
+            "
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
