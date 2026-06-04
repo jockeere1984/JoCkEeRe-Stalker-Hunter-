@@ -16,8 +16,6 @@ orientation = portrait
 android.minapi = 21
 android.api = 33
 android.ndk = 25b
-android.ndk_path = /opt/android-sdk/ndk/25.2.9519653
-android.sdk_path = /opt/android-sdk
 android.build_tools_version = 33.0.2
 
 android.permissions = INTERNET,READ_EXTERNAL_STORAGE,WRITE_EXTERNAL_STORAGE,ACCESS_NETWORK_STATE
@@ -26,7 +24,6 @@ android.archs = armeabi-v7a
 
 android.release_artifact = apk
 
-p4a.branch = develop
 p4a.hook = pre_build_hook.py
 
 [buildozer]
