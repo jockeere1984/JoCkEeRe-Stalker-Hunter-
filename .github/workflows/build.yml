@@ -18,7 +18,7 @@ jobs:
           sudo rm -rf /usr/local/lib/android /usr/share/dotnet /opt/ghc
           df -h
 
-      - name: Setup Java
+      - name: Setup Java 17
         uses: actions/setup-java@v3
         with:
           distribution: temurin
@@ -47,52 +47,65 @@ jobs:
           pip install buildozer==1.5.0
           pip install "python-for-android==2023.9.16"
 
-      - name: Setup Android SDK
+      - name: Setup Android SDK manually
         run: |
-          mkdir -p $HOME/android-sdk/cmdline-tools
+          BSDK=$HOME/.buildozer/android/platform/android-sdk
+          mkdir -p $BSDK/cmdline-tools
+
+          # Download cmdline-tools
           wget -q https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip \
                -O /tmp/cmdtools.zip
-          unzip -q /tmp/cmdtools.zip -d $HOME/android-sdk/cmdline-tools
-          mv $HOME/android-sdk/cmdline-tools/cmdline-tools \
-             $HOME/android-sdk/cmdline-tools/latest
+          unzip -q /tmp/cmdtools.zip -d $BSDK/cmdline-tools
+          mv $BSDK/cmdline-tools/cmdline-tools $BSDK/cmdline-tools/latest
 
-          export ANDROID_HOME=$HOME/android-sdk
-          export PATH=$ANDROID_HOME/cmdline-tools/latest/bin:$PATH
+          export ANDROID_HOME=$BSDK
+          export PATH=$BSDK/cmdline-tools/latest/bin:$PATH
 
-          yes | sdkmanager --licenses 2>/dev/null || true
-          sdkmanager "platform-tools" "platforms;android-33" "build-tools;33.0.2"
+          # Accept ALL licenses
+          mkdir -p $BSDK/licenses
+          echo -e "\n24333f8a63b6825ea9c5514f83c2829b004d1fee" > $BSDK/licenses/android-sdk-license
+          echo -e "\n84831b9409646a918e30573bab4c9c91346d8abd" > $BSDK/licenses/android-sdk-preview-license
+          echo -e "\nd975f751698a77b662f1254ddbeed3901e976f5a" > $BSDK/licenses/intel-android-extra-license
+          echo -e "\n33b6937b7bec6c9d53df6a1bcff15a3ae9bcf6e1" >> $BSDK/licenses/android-sdk-license
+          echo -e "\n601085b94cd77f0b54ff86406957099ebe79c4d6" > $BSDK/licenses/android-googletv-license
 
-          # Install NDK
+          # Install only what we need (33.0.2 not 37)
+          yes | sdkmanager --licenses --sdk_root=$BSDK 2>/dev/null || true
+          sdkmanager --sdk_root=$BSDK "platform-tools"
+          sdkmanager --sdk_root=$BSDK "platforms;android-33"
+          sdkmanager --sdk_root=$BSDK "build-tools;33.0.2"
+
+          # Symlinks for tools/bin
+          mkdir -p $BSDK/tools/bin
+          ln -sf $BSDK/cmdline-tools/latest/bin/sdkmanager $BSDK/tools/bin/sdkmanager
+          ln -sf $BSDK/cmdline-tools/latest/bin/avdmanager $BSDK/tools/bin/avdmanager
+
+          # Verify aidl
+          ls $BSDK/build-tools/33.0.2/aidl && echo "aidl OK"
+
+          echo "BSDK=$BSDK" >> $GITHUB_ENV
+
+      - name: Setup Android NDK
+        run: |
+          BSDK=$HOME/.buildozer/android/platform/android-sdk
+          mkdir -p $BSDK/ndk
+
           wget -q https://dl.google.com/android/repository/android-ndk-r25b-linux.zip \
                -O /tmp/ndk.zip
-          unzip -q /tmp/ndk.zip -d $HOME/android-sdk/
-          mv $HOME/android-sdk/android-ndk-r25b $HOME/android-sdk/ndk
-          mkdir -p $HOME/android-sdk/ndk
-          mv $HOME/android-sdk/android-ndk-r25b $HOME/android-sdk/ndk/25.2.9519653 2>/dev/null || true
+          unzip -q /tmp/ndk.zip -d /tmp/ndk_extract
+          mv /tmp/ndk_extract/android-ndk-r25b $BSDK/ndk/25.2.9519653
 
-          # Compat symlinks for buildozer
-          mkdir -p $HOME/android-sdk/tools/bin
-          ln -sf $HOME/android-sdk/cmdline-tools/latest/bin/sdkmanager \
-                 $HOME/android-sdk/tools/bin/sdkmanager
-          ln -sf $HOME/android-sdk/cmdline-tools/latest/bin/avdmanager \
-                 $HOME/android-sdk/tools/bin/avdmanager
-
-          echo "ANDROID_HOME=$HOME/android-sdk" >> $GITHUB_ENV
-          echo "ANDROID_SDK_ROOT=$HOME/android-sdk" >> $GITHUB_ENV
-          echo "ANDROID_NDK_HOME=$HOME/android-sdk/ndk/25.2.9519653" >> $GITHUB_ENV
-
-      - name: Patch buildozer.spec paths
-        run: |
-          sed -i "s|android.sdk_path = .*|android.sdk_path = $HOME/android-sdk|g" buildozer.spec
-          sed -i "s|android.ndk_path = .*|android.ndk_path = $HOME/android-sdk/ndk/25.2.9519653|g" buildozer.spec
-          cat buildozer.spec
+          echo "NDK ready: $BSDK/ndk/25.2.9519653"
+          ls $BSDK/ndk/25.2.9519653
 
       - name: Build APK
         run: |
-          export ANDROID_HOME=$HOME/android-sdk
-          export ANDROID_SDK_ROOT=$HOME/android-sdk
-          export ANDROID_NDK_HOME=$HOME/android-sdk/ndk/25.2.9519653
-          export PATH=$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools:$ANDROID_HOME/build-tools/33.0.2:$PATH
+          BSDK=$HOME/.buildozer/android/platform/android-sdk
+          export ANDROID_HOME=$BSDK
+          export ANDROID_SDK_ROOT=$BSDK
+          export ANDROID_NDK_HOME=$BSDK/ndk/25.2.9519653
+          export PATH=$BSDK/cmdline-tools/latest/bin:$BSDK/platform-tools:$BSDK/build-tools/33.0.2:$PATH
+
           python -m buildozer -v android debug 2>&1
 
       - name: Upload APK
