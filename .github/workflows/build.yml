@@ -2,115 +2,21 @@ name: Build APK
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, master ]
   workflow_dispatch:
 
 jobs:
   build:
-    runs-on: ubuntu-22.04
-    timeout-minutes: 90
-
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
-      - name: Free disk space
-        run: |
-          sudo rm -rf /usr/local/lib/android /usr/share/dotnet /opt/ghc
-          df -h
-
-      - name: Setup Java 17
-        uses: actions/setup-java@v3
-        with:
-          distribution: temurin
-          java-version: '17'
-
-      - name: Setup Python 3.10
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.10'
-
-      - name: Install system dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y \
-            git zip unzip \
-            autoconf libtool pkg-config \
-            zlib1g-dev libncurses5-dev \
-            libffi-dev libssl-dev \
-            cmake build-essential \
-            libltdl-dev patchelf ant
-
-      - name: Install Python dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install "cython>=3.0.0,<4"
-          pip install buildozer==1.5.0
-          pip install "python-for-android==2023.9.16"
-
-      - name: Setup Android SDK manually
-        run: |
-          BSDK=$HOME/.buildozer/android/platform/android-sdk
-          mkdir -p $BSDK/cmdline-tools
-
-          # Download cmdline-tools
-          wget -q https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip \
-               -O /tmp/cmdtools.zip
-          unzip -q /tmp/cmdtools.zip -d $BSDK/cmdline-tools
-          mv $BSDK/cmdline-tools/cmdline-tools $BSDK/cmdline-tools/latest
-
-          export ANDROID_HOME=$BSDK
-          export PATH=$BSDK/cmdline-tools/latest/bin:$PATH
-
-          # Accept ALL licenses
-          mkdir -p $BSDK/licenses
-          echo -e "\n24333f8a63b6825ea9c5514f83c2829b004d1fee" > $BSDK/licenses/android-sdk-license
-          echo -e "\n84831b9409646a918e30573bab4c9c91346d8abd" > $BSDK/licenses/android-sdk-preview-license
-          echo -e "\nd975f751698a77b662f1254ddbeed3901e976f5a" > $BSDK/licenses/intel-android-extra-license
-          echo -e "\n33b6937b7bec6c9d53df6a1bcff15a3ae9bcf6e1" >> $BSDK/licenses/android-sdk-license
-          echo -e "\n601085b94cd77f0b54ff86406957099ebe79c4d6" > $BSDK/licenses/android-googletv-license
-
-          # Install only what we need (33.0.2 not 37)
-          yes | sdkmanager --licenses --sdk_root=$BSDK 2>/dev/null || true
-          sdkmanager --sdk_root=$BSDK "platform-tools"
-          sdkmanager --sdk_root=$BSDK "platforms;android-33"
-          sdkmanager --sdk_root=$BSDK "build-tools;33.0.2"
-
-          # Symlinks for tools/bin
-          mkdir -p $BSDK/tools/bin
-          ln -sf $BSDK/cmdline-tools/latest/bin/sdkmanager $BSDK/tools/bin/sdkmanager
-          ln -sf $BSDK/cmdline-tools/latest/bin/avdmanager $BSDK/tools/bin/avdmanager
-
-          # Verify aidl
-          ls $BSDK/build-tools/33.0.2/aidl && echo "aidl OK"
-
-          echo "BSDK=$BSDK" >> $GITHUB_ENV
-
-      - name: Setup Android NDK
-        run: |
-          BSDK=$HOME/.buildozer/android/platform/android-sdk
-          mkdir -p $BSDK/ndk
-
-          wget -q https://dl.google.com/android/repository/android-ndk-r25b-linux.zip \
-               -O /tmp/ndk.zip
-          unzip -q /tmp/ndk.zip -d /tmp/ndk_extract
-          mv /tmp/ndk_extract/android-ndk-r25b $BSDK/ndk/25.2.9519653
-
-          echo "NDK ready: $BSDK/ndk/25.2.9519653"
-          ls $BSDK/ndk/25.2.9519653
-
       - name: Build APK
-        run: |
-          BSDK=$HOME/.buildozer/android/platform/android-sdk
-          export ANDROID_HOME=$BSDK
-          export ANDROID_SDK_ROOT=$BSDK
-          export ANDROID_NDK_HOME=$BSDK/ndk/25.2.9519653
-          export PATH=$BSDK/cmdline-tools/latest/bin:$BSDK/platform-tools:$BSDK/build-tools/33.0.2:$PATH
-
-          python -m buildozer -v android debug 2>&1
-
+        uses: ArtemSBulgakov/buildozer-action@v1
+        with:
+          command: buildozer android debug
+          buildozer_spec_path: buildozer.spec
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: JoCkEeRe-APK
-          path: bin/*.apk
-          retention-days: 7
+          name: JoCkEeRe-IPTV
+          path: bin/*.apk 
