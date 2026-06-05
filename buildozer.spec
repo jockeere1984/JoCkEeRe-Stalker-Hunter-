@@ -1,6 +1,6 @@
 [app]
 title = JoCkEeRe IPTV
-package.name = iptvplayer
+package.name = jockiptvplayer
 package.domain = org.jockeere
 source.dir = .
 source.include_exts = py,png,jpg,kv,atlas
