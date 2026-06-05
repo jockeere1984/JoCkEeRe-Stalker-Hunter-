@@ -5,21 +5,17 @@ package.domain = org.jockeere
 source.dir = .
 source.include_exts = py,png,jpg,kv,atlas
 version = 1.0.0
-requirements = python3,kivy,requests,jnius,android,pyjnius
+requirements = python3,kivy,requests,pyjnius
 orientation = portrait
-osx.python_version = 3
-osx.kivy_version = 2.1.0
 fullscreen = 0
 android.permissions = INTERNET, WRITE_EXTERNAL_STORAGE, READ_EXTERNAL_STORAGE
-android.api = 33
+android.api = 30
 android.minapi = 21
-android.ndk = 25b
-android.sdk = 33
+android.ndk = 23b
+android.sdk = 30
+android.build_tools = 30.0.3
 android.accept_sdk_license = True
-android.build_tools = 33.0.2
-android.archs = arm64-v8a, armeabi-v7a
-android.gradle_dependencies = 'androidx.recyclerview:recyclerview:1.2.1'
-android.add_src = 
+android.archs = arm64-v8a
 
 [buildozer]
 log_level = 2
