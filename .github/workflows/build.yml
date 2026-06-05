@@ -12,15 +12,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: List files for debugging
-        run: |
-          echo "Current directory:"
-          pwd
-          echo "Files in root:"
-          ls -la
-          echo "Tree structure:"
-          find . -name "*.spec" -type f
-
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
@@ -29,12 +20,21 @@ jobs:
       - name: Install system dependencies
         run: |
           sudo apt update
-          sudo apt install -y git zip unzip openjdk-17-jdk autoconf libtool pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev cmake libffi-dev libssl-dev
+          sudo apt install -y git zip unzip openjdk-17-jdk autoconf libtool pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev cmake libffi-dev libssl-dev expect
 
       - name: Install buildozer
         run: |
           pip install --upgrade pip
           pip install buildozer cython
+
+      - name: Accept Android SDK licenses (manual)
+        run: |
+          # Create a dummy sdkmanager if not exists (buildozer will install it)
+          # Then accept licenses automatically
+          mkdir -p ~/.android
+          echo "count=0" > ~/.android/repositories.cfg
+          # Accept licenses via expect or yes
+          yes | sdkmanager --licenses || true
 
       - name: Build APK
         run: |
