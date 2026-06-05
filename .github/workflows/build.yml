@@ -7,7 +7,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-20.04
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -20,21 +20,12 @@ jobs:
       - name: Install system dependencies
         run: |
           sudo apt update
-          sudo apt install -y git zip unzip openjdk-17-jdk autoconf libtool pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev cmake libffi-dev libssl-dev expect
+          sudo apt install -y git zip unzip openjdk-11-jdk autoconf libtool pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev cmake libffi-dev libssl-dev
 
       - name: Install buildozer
         run: |
           pip install --upgrade pip
           pip install buildozer cython
-
-      - name: Accept Android SDK licenses (manual)
-        run: |
-          # Create a dummy sdkmanager if not exists (buildozer will install it)
-          # Then accept licenses automatically
-          mkdir -p ~/.android
-          echo "count=0" > ~/.android/repositories.cfg
-          # Accept licenses via expect or yes
-          yes | sdkmanager --licenses || true
 
       - name: Build APK
         run: |
