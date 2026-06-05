@@ -1,6 +1,6 @@
 [app]
 title = JoCkEeRe IPTV
-package.name = jockiptvplayer
+package.name = iptvplayer
 package.domain = org.jockeere
 source.dir = .
 source.include_exts = py,png,jpg,kv,atlas
@@ -16,7 +16,6 @@ android.sdk = 30
 android.build_tools = 30.0.3
 android.accept_sdk_license = True
 android.archs = arm64-v8a
-android.gradle_dependencies = 'androidx.recyclerview:recyclerview:1.2.1'
 
 [buildozer]
 log_level = 2
